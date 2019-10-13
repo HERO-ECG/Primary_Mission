@@ -1,0 +1,37 @@
+对classic.c文件的更改：
+
+在void ChassisSetSpeed(float theta) 中
+W_sin = (det_speedy+spd_forward)*ksin;
+W_cos =(det_speedy+spd_forward)*kcos;
+D_sin = (det_speedx+spd_right)*ksin;
+D_cos = (det_speedx+spd_right)*kcos;
+det_speedx和det_speedy为为了控制小车8字运动在原先速度基础上叠加一个在某周期内变化的x轴方向速度和y方向速度
+
+void Chassis_SetModeFromControl(void)中 
+static int i=0;//静态定义一个变量作为时间变量，之后可在每次进入函数时累加i 到达一个周期时间时清零 在该周期内改变det_speedx、det_speedy.
+{
+i++;
+if(i>0&&i<T/8)//将8字分为8个周期 每个周期都是y轴变化率减小
+{
+     det_speedx = speed_basicx1;
+     det_speedy = speed_basicy*a1;//相同的一段时间  x的变化比较小、默认x不改变 ，y轴速度乘上一个a1 a1随i变化
+}
+if(i>=T/8&&i<T/4)
+{
+      det_speedx = speed_basicx2;//稍微改变x速度大小
+      det_speedy = -speed_basicy*a2;//改变了y轴的运动方向
+}
+if(i>=T/4&&i<3*T/8)
+{
+     det_speedx = -speed_basicx2;
+     det_speedy = -speed_basicy*a2;//改变x运动方向
+}
+if(i>=T/4&&i<3*T/8)
+{
+     det_speedx = -speed_basicx;
+     det_speedy = speed_basicy*a3;//改变y运动方向
+}
+//至此 完成了一半8 并且回到了原点 接下来只要做相反的运动就行了
+}
+
+对classic.h的修改：ChassisFollowMode_e中增加一个控制8字运动的枚举量
