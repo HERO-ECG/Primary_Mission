@@ -2,3 +2,5 @@
 *.crf
 *.crf
 *.crf
+*.o
+*.d
